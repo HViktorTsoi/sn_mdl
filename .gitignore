@@ -1,0 +1,8 @@
+.idea
+.vscode
+__pycache__
+.ipynb_checkpoints
+data/stable/ER/graph.gpickle
+data/stable/WS/graph.gpickle
+data/stable/LIVEJ/graph.gpickle
+data/stable/POKEC/graph.gpickle

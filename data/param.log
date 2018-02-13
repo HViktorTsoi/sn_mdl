@@ -1,0 +1,199 @@
+ssh://qian@10.2.14.214:22/home/qian/anaconda3/bin/python -u /home/qian/hvt/SocialNetwork/benchmark.py
+
+er_model
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.049986864890930606
+
+ws_model
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.52484253224211164
+[-0.0017027   1.54667126]
+
+ba_model
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.0036170225578200607
+[-2.08171345  0.46639947]
+
+NME
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.20044333970184486
+[-0.91276011  0.2104865 ]
+
+twitter
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.38546463976371631
+[-0.76955064  0.63954482]
+
+gplus
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.2796576168558475
+[-0.2644644  -0.18528236]
+
+pokec
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.11269413045327735
+[-0.53644894 -0.35482766]
+
+livej
+
+analyse_clustering_coefficient
+计算聚集系数
+平均聚集系数: 0.26993240389234391
+[-0.49818276 -0.08346672]
+
+Process finished with exit code 0
+
+
+ssh://qian@10.2.14.214:22/home/qian/anaconda3/bin/python -u /home/qian/hvt/SocialNetwork/benchmark.py
+
+pokec
+
+draw_degree_dist
+[-4.44950898  5.74720661]
+[-0.80479975 -0.85328785]
+
+draw_degree_dist
+[-3.9475858   4.64245312]
+[-0.62721418 -1.00366599]
+
+Process finished with exit code 0
+
+ssh://qian@10.2.14.214:22/home/qian/anaconda3/bin/python -u /home/qian/hvt/SocialNetwork/benchmark.py
+
+livej
+
+draw_degree_dist
+[-2.84673907  2.23378703]
+[-1.03506865 -0.65070834]
+
+draw_degree_dist
+[-2.48322559  1.43617298]
+[-0.98990411 -0.70428349]
+
+Process finished with exit code 0
+
+ssh://qian@10.2.14.214:22/home/qian/anaconda3/bin/python -u /home/qian/hvt/SocialNetwork/benchmark.py
+
+er_model
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.017278
+
+NME
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.619513
+
+analyse_gini_coefficient
+当前正在计算in
+计算总度数
+计算曲线数据
+基尼系数:0.797650
+
+analyse_gini_coefficient
+当前正在计算out
+计算总度数
+计算曲线数据
+基尼系数:0.465128
+
+twitter
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.659311
+
+analyse_gini_coefficient
+当前正在计算out
+计算总度数
+计算曲线数据
+基尼系数:0.690036
+
+analyse_gini_coefficient
+当前正在计算in
+计算总度数
+计算曲线数据
+基尼系数:0.697981
+
+gplus
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.783678
+
+analyse_gini_coefficient
+当前正在计算out
+计算总度数
+计算曲线数据
+基尼系数:0.850203
+
+analyse_gini_coefficient
+当前正在计算in
+计算总度数
+计算曲线数据
+基尼系数:0.812591
+
+pokec
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.620517
+
+analyse_gini_coefficient
+当前正在计算in
+计算总度数
+计算曲线数据
+基尼系数:0.644284
+
+analyse_gini_coefficient
+当前正在计算out
+计算总度数
+计算曲线数据
+基尼系数:0.643254
+
+livej
+
+analyse_gini_coefficient
+当前正在计算all
+计算总度数
+计算曲线数据
+基尼系数:0.714302
+
+analyse_gini_coefficient
+当前正在计算in
+计算总度数
+计算曲线数据
+基尼系数:0.723703
+
+analyse_gini_coefficient
+当前正在计算out
+计算总度数
+计算曲线数据
+基尼系数:0.721520
+
+Process finished with exit code 0
