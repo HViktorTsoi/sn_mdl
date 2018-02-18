@@ -57,6 +57,39 @@ analyse_clustering_coefficient
 
 Process finished with exit code 0
 
+/home/hviktortsoi/DevTools/anaconda3/bin/python /home/hviktortsoi/Documents/毕业设计/实验/SocialNetwork/benchmark.py
+
+NME
+
+draw_degree_dist
+[-2.5255918   0.43134859]
+[-0.78503368 -0.70801366]
+
+draw_degree_dist
+[-2.96335184  0.97374096]
+[-0.25933816 -0.6923654 ]
+
+twitter
+
+draw_degree_dist
+[-2.64251146  0.97925051]
+[-1.11614391 -0.6136354 ]
+
+draw_degree_dist
+[-2.64261626  1.07576415]
+[-0.89765342 -0.76906756]
+
+gplus
+
+draw_degree_dist
+[-2.10438099  0.55966104]
+[-1.04229298 -0.72060754]
+
+draw_degree_dist
+[-1.52890266 -0.35462747]
+[-0.8861451 -1.0259128]
+
+Process finished with exit code 0
 
 ssh://qian@10.2.14.214:22/home/qian/anaconda3/bin/python -u /home/qian/hvt/SocialNetwork/benchmark.py
 
@@ -121,7 +154,7 @@ twitter
 analyse_gini_coefficient
 当前正在计算all
 计算总度数
-计算曲线数据
+计算曲线数据0.783
 基尼系数:0.659311
 
 analyse_gini_coefficient

@@ -99,24 +99,24 @@ def twitter(existed=None, isHold=True):
     # 取子图
     G_sub = G.subgraph(sorted(list(G.nodes))[30000:50000])
     common_lim = (0, 3, -4.3, 0)
-    # analyser.draw_degree_dist(
-    #     G_sub.in_degree, hold=isHold, lbl='入度分布',
-    #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
-    #     fit_curve_range2=(0, 2),
-    #     fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
-    #     fit_curve_range1=(0.8, 5),
-    #     lim=common_lim,
-    #     save_path=save_path, G=G_sub
-    # )
-    # analyser.draw_degree_dist(
-    #     G_sub.out_degree, hold=isHold, lbl='出度分布',
-    #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.35),
-    #     fit_curve_range2=(0, 2),
-    #     fit_func=analyser.linear_log_fit, fit_range=(1.2, 2.5, 0.5),
-    #     fit_curve_range1=(0.8, 5),
-    #     lim=common_lim,
-    #     save_path=save_path, G=G_sub
-    # )
+    analyser.draw_degree_dist(
+        G_sub.in_degree, hold=isHold, lbl='入度分布',
+        fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
+        fit_curve_range2=(0, 2),
+        fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
+        fit_curve_range1=(0.8, 5),
+        lim=common_lim,
+        save_path=save_path, G=G_sub
+    )
+    analyser.draw_degree_dist(
+        G_sub.out_degree, hold=isHold, lbl='出度分布',
+        fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.35),
+        fit_curve_range2=(0, 2),
+        fit_func=analyser.linear_log_fit, fit_range=(1.2, 2.5, 0.5),
+        fit_curve_range1=(0.8, 5),
+        lim=common_lim,
+        save_path=save_path, G=G_sub
+    )
     # analyser.draw_degree_dist(
     #     G_sub.degree, hold=isHold, lbl='度分布',
     #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 0.8, 0.35),
@@ -132,9 +132,9 @@ def twitter(existed=None, isHold=True):
     #     sample_count=15000,
     #     ticks=None, lim=(0, 3, -3.3, 0)
     # )
-    analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='度-洛伦兹曲线', hold=True)
-    analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='入度-洛伦兹曲线', hold=True)
-    analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='出度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='入度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='出度-洛伦兹曲线', hold=True)
 
 
 @utils.destroy
@@ -144,24 +144,24 @@ def gplus(existed=None, isHold=True):
     # G_sub = G.subgraph(sorted(list(G.nodes))[50000:65000])
     G_sub = analyser.load_graph(save_path, graph_file='sub_graph.gpickle')
     common_lim = (0, 3, -4.3, 0)
-    # analyser.draw_degree_dist(
-    #     G_sub.in_degree, hold=isHold, lbl='入度分布',
-    #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
-    #     fit_curve_range2=(0, 2),
-    #     fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
-    #     fit_curve_range1=(0.8, 5),
-    #     lim=common_lim,
-    #     save_path=save_path, G=G_sub
-    # )
-    # analyser.draw_degree_dist(
-    #     G_sub.out_degree, hold=isHold, lbl='出度分布',
-    #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.35),
-    #     fit_curve_range2=(0, 2),
-    #     fit_func=analyser.linear_log_fit, fit_range=(1.2, 2.5, 0.5),
-    #     fit_curve_range1=(0.8, 5),
-    #     lim=common_lim,
-    #     save_path=save_path, G=G_sub
-    # )
+    analyser.draw_degree_dist(
+        G_sub.in_degree, hold=isHold, lbl='入度分布',
+        fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
+        fit_curve_range2=(0, 2),
+        fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
+        fit_curve_range1=(0.8, 5),
+        lim=common_lim,
+        save_path=save_path, G=G_sub
+    )
+    analyser.draw_degree_dist(
+        G_sub.out_degree, hold=isHold, lbl='出度分布',
+        fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.35),
+        fit_curve_range2=(0, 2),
+        fit_func=analyser.linear_log_fit, fit_range=(1.2, 2.5, 0.5),
+        fit_curve_range1=(0.8, 5),
+        lim=common_lim,
+        save_path=save_path, G=G_sub
+    )
     # analyser.draw_degree_dist(
     #     G_sub.degree, hold=isHold, lbl='度分布',
     #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 0.8, 0.35),
@@ -177,9 +177,9 @@ def gplus(existed=None, isHold=True):
     #     sample_count=5000,
     #     ticks=None, lim=(0, 3, -3.3, 0)
     # )
-    analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='度-洛伦兹曲线', hold=True)
-    analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='入度-洛伦兹曲线', hold=True)
-    analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='出度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='入度-洛伦兹曲线', hold=True)
+    # analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='出度-洛伦兹曲线', hold=True)
 
 
 @utils.destroy
@@ -298,8 +298,52 @@ def degree_layout():
     plt.show()
 
 
+@utils.destroy
 def degree_in_out_layout():
-    pass
+    # 载入数据集
+    ba = analyser.load_graph(save_path='./data/stable/BA')
+    nme = analyser.load_from_csv(path='./data/stable/NME_2')
+    twitter = analyser.load_graph(save_path='./data/stable/TWITTER')
+    gplus = analyser.load_graph(save_path='./data/stable/GPlus', graph_file='sub_graph.gpickle')
+    common_lim = (0, 3, -4.3, 0)
+    isHold = True
+    save_path = ''
+    data_list = (
+        [nme.in_degree, twitter.in_degree, gplus.in_degree, ba.degree, '(a)'],
+        [nme.out_degree, twitter.out_degree, gplus.out_degree, ba.degree, '(b)'],
+    )
+    analyser.FIT_CURVE = False
+    plt.gcf().set_size_inches(6.4 * 2, 4.8)
+    for idx, data in enumerate(data_list):
+        plt.subplot(1, 2, idx + 1)
+        analyser.draw_degree_dist(
+            data[0], hold=isHold, lbl='本文提出模型',
+            lim=common_lim,
+            style='rx',
+            save_path=save_path, G=nme
+        )
+        analyser.draw_degree_dist(
+            data[1], hold=isHold, lbl='Twitter数据集',
+            lim=common_lim,
+            style='go',
+            save_path=save_path, G=twitter
+        )
+        analyser.draw_degree_dist(
+            data[2], hold=isHold, lbl='Google+数据集',
+            lim=common_lim,
+            style='b<',
+            save_path=save_path, G=gplus
+        )
+        analyser.draw_degree_dist(
+            data[3], hold=isHold, lbl='Barabási-Albert模型',
+            lim=common_lim,
+            style='c>',
+            save_path=save_path, G=gplus
+        )
+        plt.xlabel('节点度值\n%s' % data[4], linespacing=2)
+    plt.gcf().tight_layout()
+    plt.savefig('data/stable/出入度分布对比.png')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -324,4 +368,5 @@ if __name__ == '__main__':
     '''分析email数据集'''
     # email(existed=True, isHold=False)
 
-    degree_layout()
+    # degree_layout()
+    degree_in_out_layout()
