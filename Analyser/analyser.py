@@ -630,7 +630,7 @@ def NME(existed=None, types=(3,), isHold=True, path='data/stable/NME_2', lbl=Non
             NME(types=[0], isHold=True, path='../data/20180131_122403_n20000_e39998_d1', style='rx', lbl='$\epsilon=1$')
             plt.savefig('%s/度随参数分布.png' % path)
         elif type == 12:
-            G = G.subgraph(nodes=random.sample(G.nodes, 2000))
+            # G = G.subgraph(nodes=random.sample(G.nodes, 2000))
             print(G.nodes)
             plt.gcf().set_size_inches(20, 10)
             nx.draw_networkx(G, nx.spring_layout(G), width=0.5, node_size=50, font_size=5)
@@ -642,6 +642,6 @@ if __name__ == '__main__':
     # 载入网络数据
     # 效果比较好/stable/Nme
     # path = '../data/20180202_002604_n20000_e110320_30_k10'
-    # path = '../data/stable/NME_2'
-    path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
+    path = '../data/stable/NME_2'
+    # path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
     NME(types=[12], isHold=True, path=path)
