@@ -160,12 +160,12 @@ def choose_node(G, node_id_list, new_node_id, type):
         if rnd <= choose_factor:
             log_status("选中了节点: {}".format(node_id))
             # 记录选边信息
-            # dist.append({
-            #     'cur': new_node_id,
-            #     'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
-            #                  for node_id in node_id_list if node_id != new_node_id},
-            #     'chosen': node_id
-            # })
+            dist.append({
+                'cur': new_node_id,
+                'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
+                             for node_id in node_id_list if node_id != new_node_id},
+                'chosen': node_id
+            })
             return node_id
         else:
             rnd -= choose_factor
@@ -306,15 +306,15 @@ if __name__ == '__main__':
     # 存储演化过程特性
     dist = []
     param_delta = 5
-    param_k = 10
+    param_k = 7
     save_info = 'dta%d_%s' % (param_delta, input('演化关键信息: '))
     network_model = start_evolution(
         init_graph_size=param_k - 1,
         delta_origin=param_delta,
-        max_ntwk_size=20000,
+        max_ntwk_size=6000,
         k=param_k
     )
     # 保存图
     saved_path = save_graph(network_model, save_info)
     # 保存演化信息
-    # pickle.dump(dist, file=open('/tmp/rst.pkl', 'wb'))
+    pickle.dump(dist, file=open('/tmp/rst.pkl', 'wb'))

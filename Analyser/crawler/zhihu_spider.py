@@ -1,4 +1,11 @@
+import random
+
+import gevent
 import sys
+from gevent import monkey
+import gevent.pool
+import gc
+import time
 
 import requests
 import redis
@@ -7,10 +14,13 @@ from collections import Iterable
 import json
 from Analyser.crawler.ProxiesService import ProxiesService
 
+import itchat
+
 
 class RedisQueue:
     def __init__(self, db_name, host='localhost', port=6379, decode_responses=True):
-        pool = redis.ConnectionPool(host=host, port=port, decode_responses=decode_responses)  # host是redis主机，需要redis服务端和客户端都起着 redis默认端口是6379
+        pool = redis.ConnectionPool(host=host, port=port,
+                                    decode_responses=decode_responses)  # host是redis主机，需要redis服务端和客户端都起着 redis默认端口是6379
         self._r = redis.Redis(connection_pool=pool)
         self._db_name = db_name
 
@@ -47,7 +57,6 @@ class RequestExecutor:
             'Connection': 'keep-alive',
             'Host': 'www.zhihu.com',
             'origin': 'https://www.zhihu.com',
-            'Referer': 'https://www.zhihu.com/topic/19550638/hot',
             'User-Agent': '',
         }
         # 连接到MongoDB
@@ -62,7 +71,7 @@ class RequestExecutor:
     def check_and_save_user(self, user):
         return self._user_col.update_one(
             filter={'id': user['id']},
-            update={'$set': user},
+            update={'$set': {'id': user['id']}},
             upsert=True
         ).upserted_id
 
@@ -89,10 +98,48 @@ class RequestExecutor:
             headers=self._headers,
             proxies=self._proxy_provider.fetch_a_proxy()
         ).content.decode()
-        return json.loads(content)
+        try:
+            parsed_result = json.loads(content)
+        except Exception as e:
+            print(content, sys.stderr)
+            raise e
+        return parsed_result
+
+    def process(self, q, url, cur_user_token, offset, total_item):
+        try:
+            # 获取一页
+            user_list = self.fetch(
+                url=url,
+                offset=offset
+            )
+            # 判断是不是真读到了数据
+            if user_list.get('paging') is None:
+                print(user_list, file=sys.stderr)
+                raise Exception('错误：用户列表中没有paging字段 请检查是否ip受限')
+            print(cur_user_token, '%d/%d' % (offset, total_item), len(user_list['data']))
+            # 处理当前页的用户列表
+            for user in user_list['data']:
+                # 保存访问到的关系
+                self.save_relation(cur_user_token, user['url_token'])
+                # 去重
+                upserted_id = self.check_and_save_user(user)
+                # 如果有插入结果 就是不重复 没有访问过这个节点
+                if upserted_id:
+                    q.push(user['url_token'])
+            print('[开始暂停]')
+            time.sleep(1)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            # 杀死所有greenlet进程
+            gevent.killall(
+                [obj for obj in gc.get_objects() if isinstance(obj, gevent.Greenlet)]
+            )
+            sys.exit("请求时异常终止")
 
 
-if __name__ == '__main__':
+def start():
+    # 配置gevent
+    monkey.patch_all()
     # 起始用户
     start_user = 'zhouyuan'
     followees_url = 'https://www.zhihu.com/api/v4/members/{user}/followees'
@@ -107,31 +154,49 @@ if __name__ == '__main__':
         cur_user_token = q.top
         cur_offset = 0
         # 获取全部条目数
-        total_item = request_executor.fetch(url=followees_url.format(user=cur_user_token), offset=0)['paging']['totals']
+        total_item = request_executor.fetch(url=followees_url.format(user=cur_user_token), offset=0)
+        # 判断用户是否可以访问
+        if not total_item.get('paging'):
+            print(total_item, file=sys.stderr)
+            if total_item.get('error') and total_item.get('error').get('code') == 101:
+                print('该用户可能已经停用：', cur_user_token, file=sys.stderr)
+                q.pop()
+                continue
+            else:
+                raise Exception('错误：用户列表中没有paging字段 请检查是否ip受限')
+        total_item = total_item['paging']['totals']
         print(cur_user_token, '全部条目:', total_item)
+        jobs = []
+        pool = gevent.pool.Pool(size=4)
         # 开始爬取
         while cur_offset <= total_item:
-            # 获取一页
-            user_list = request_executor.fetch(
-                url=followees_url.format(user=cur_user_token),
-                offset=cur_offset
+            print('加入请求池：', cur_offset)
+            # 执行请求并处理
+            jobs.append(
+                pool.spawn(
+                    request_executor.process,
+                    q=q,
+                    url=followees_url.format(user=cur_user_token),
+                    cur_user_token=cur_user_token,
+                    offset=cur_offset,
+                    total_item=total_item
+                )
             )
-            # 判断是不是真读到了数据
-            if user_list.get('paging') is None:
-                print(user_list, file=sys.stderr)
-                raise Exception('错误：用户列表中没有paging字段 请检查是否ip受限')
-            print(cur_user_token, '%d/%d' % (cur_offset, total_item), len(user_list['data']))
-            # 处理当前页的用户列表
-            for user in user_list['data']:
-                # 保存访问到的关系
-                request_executor.save_relation(cur_user_token, user['url_token'])
-                # 去重
-                upserted_id = request_executor.check_and_save_user(user)
-                # 如果有插入结果 就是不重复 没有访问过这个节点
-                if upserted_id:
-                    q.push(user['url_token'])
-
             # 增加并保存offset
             cur_offset += request_executor.page_limit
             # breakpoint_col.update_one({}, {'$set': {'offset': offset}}, upsert=True)
+        gevent.joinall(jobs, timeout=20, raise_error=True)
         q.pop()
+
+
+if __name__ == '__main__':
+    itchat.auto_login(hotReload=True)
+    try:
+        # 发送开始消息
+        resp = itchat.send_msg(msg='开始爬取', toUserName='filehelper')
+        print(resp)
+        start()
+    except Exception as e:
+        print(e, file=sys.stderr)
+        # 发送异常
+        itchat.send_msg(msg="爬取过程中发生异常:\n%r" % e, toUserName='filehelper')
