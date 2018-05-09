@@ -41,7 +41,9 @@ def draw_ticks(custom=None, direction='n'):
     else:
         plt.xticks([0, 1, 2, 3, 4, 5], ['$10^0$', '$10^1$', '$10^2$', '$10^3$', '$10^4$', '$10^5$'])
         if direction == 'n':
-            plt.yticks([-7, -6, -5, -4, -3, -2, -1, 0], ['$10^{-7}$', '$10^{-6}$', '$10^{-5}$', '$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$', '$10^0$'])
+            plt.yticks([-7, -6, -5, -4, -3, -2, -1, 0],
+                       ['$10^{-7}$', '$10^{-6}$', '$10^{-5}$', '$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$',
+                        '$10^0$'])
         elif direction == 'p':
             plt.yticks([4, 3, 2, 1, 0], ['$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$', '$10^0$'])
 
@@ -133,7 +135,8 @@ def linear_log_fit(dist, fit_range=None, fit_curve_range=None, lim=None, **kwarg
         x = np.arange(fit_curve_range[0], fit_curve_range[1], 0.1)
     else:
         x = np.arange(0, lim[1] * 2 if lim else 100, 0.1)
-    plt.plot(x, linear_fit_func(x, v[0] + (fit_range[3] if len(fit_range) > 3 else 0), v[1] + fit_range[2]), color='k', linestyle='--', linewidth=1)
+    plt.plot(x, linear_fit_func(x, v[0] + (fit_range[3] if len(fit_range) > 3 else 0), v[1] + fit_range[2]), color='k',
+             linestyle='--', linewidth=1)
 
 
 def poisson_fit(dist, *args):
@@ -629,8 +632,10 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
             analyse_power_degree_relation(G, save_path=path)
         elif type == 11:
             FIT_CURVE = False
-            NME(types=[0], isHold=True, path='../data/20180129_125317_n20000_e74780_delta10_k10', style='go', lbl='$\epsilon=10$')
-            NME(types=[0], isHold=True, path='../data/20180202_002604_n20000_e110320_30_k10', style='b^', lbl='$\epsilon=30$')
+            NME(types=[0], isHold=True, path='../data/20180129_125317_n20000_e74780_delta10_k10', style='go',
+                lbl='$\epsilon=10$')
+            NME(types=[0], isHold=True, path='../data/20180202_002604_n20000_e110320_30_k10', style='b^',
+                lbl='$\epsilon=30$')
             NME(types=[0], isHold=True, path='../data/20180131_122403_n20000_e39998_d1', style='rx', lbl='$\epsilon=1$')
             plt.savefig('%s/i18n_度随参数分布.png' % path)
             plt.show()
@@ -656,6 +661,9 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
                 plt.imshow(fig[0])
                 plt.axis('off')
                 plt.show()
+        elif type == 14:
+            print('正在转换成pickle...')
+            nx.write_gpickle(G, path + '/n6000e27482.gpkl')
 
 
 # 单元测试
@@ -666,6 +674,6 @@ if __name__ == '__main__':
     # 载入网络数据
     # 效果比较好/stable/Nme
     # path = '../data/20180202_002604_n20000_e110320_30_k10'
-    path = '../data/stable/NME_2'
-    # path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
-    NME(types=[13], isHold=True, path=path)
+    # path = '../data/stable/NME_2'
+    path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
+    NME(types=[14], isHold=True, path=path)
