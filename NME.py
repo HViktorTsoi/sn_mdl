@@ -27,9 +27,10 @@ def init_network(init_graph_size, init_weight, k):
     init_edge_list = []
     for n in range(init_graph_size):
         # G.add_node(n, Os=0, Is=0, V=random.random(), D=generate_domin_vector(k))
+        # 领域向量环形初始化
         G.add_node(
             n, Os=0, Is=0, V=random.random(),
-            D=[1 if (n == _) or (n + 1 == _) else 0 for _ in range(k)]
+            D=[1 if (n % k == _) or ((n + 1) % k == _) else 0 for _ in range(k)]
         )
     for f in range(init_graph_size - 1):
         # init_edge_list += [
@@ -160,12 +161,12 @@ def choose_node(G, node_id_list, new_node_id, type):
         if rnd <= choose_factor:
             log_status("选中了节点: {}".format(node_id))
             # 记录选边信息
-            dist.append({
-                'cur': new_node_id,
-                'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
-                             for node_id in node_id_list if node_id != new_node_id},
-                'chosen': node_id
-            })
+            # dist.append({
+            #     'cur': new_node_id,
+            #     'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
+            #                  for node_id in node_id_list if node_id != new_node_id},
+            #     'chosen': node_id
+            # })
             return node_id
         else:
             rnd -= choose_factor
@@ -202,11 +203,15 @@ def save_graph(G, info):
     return save_path
 
 
-def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k):
+def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_community=False):
     G = init_network(init_graph_size=init_graph_size, init_weight=1, k=k)
     while G.number_of_nodes() < max_ntwk_size:
         # 添加一个节点，并且按照入势选择网络中的一个节点进行连接
         new_node_id = add_new_node(G, k)
+        # 如果开启社区分析 则分析社区
+        if analyse_community and new_node_id % 1000 == 0:
+            analyser.analyse_communities(G, calc_mod=True)
+            # analyser.draw_graph(G)
         # 恢复delta的值
         delta = delta_origin
         while not (
@@ -305,16 +310,19 @@ def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k):
 if __name__ == '__main__':
     # 存储演化过程特性
     dist = []
-    param_delta = 5
+    param_delta = 3
     param_k = 7
     save_info = 'dta%d_%s' % (param_delta, input('演化关键信息: '))
     network_model = start_evolution(
-        init_graph_size=param_k - 1,
+        # init_graph_size=param_k - 1,
+        init_graph_size=600,
         delta_origin=param_delta,
-        max_ntwk_size=6000,
-        k=param_k
+        max_ntwk_size=10000,
+        k=param_k,
+        analyse_community=False
     )
     # 保存图
     saved_path = save_graph(network_model, save_info)
     # 保存演化信息
     pickle.dump(dist, file=open('/tmp/rst.pkl', 'wb'))
+    # analyser.analyse_communities(G=network_model, calc_mod=True)

@@ -394,39 +394,21 @@ def load_from_csv(path):
     return G
 
 
-def analyse_communities(G, k=4):
+def analyse_communities(G, calc_mod=False):
     def calc_domain_suitability(a1, a2):
         k = len(a1)
         return sum(
             [a1[idx] == a2[idx] == 1 for idx in range(k)]
         ) / float(k)
 
-    G_ud = nx.Graph()
-    for edge in G.edges:
-        f, t = edge[0], edge[1]
-        if not G_ud.has_edge(f, t):
-            factor = calc_domain_suitability(
-                G.nodes[f][D], G.nodes[t][D]
-            )
-            G_ud.add_edge(f, t, suit=factor)
-            print(edge)
-    cms = community.k_clique_communities(G_ud, k)
-    id = 0
+    # 进行社区分析 划分方式为lpa
+    g_ud = G.to_undirected()
+    cms = list(nx.algorithms.community.label_propagation_communities(g_ud))
+    print('社区数量: ', len(cms))
     for cm in cms:
-        nbr = set()
-        for node_id in cm:
-            nbr = nbr | set(G.successors(node_id))
-        nbr = nbr - cm
-        print(nbr)
-        plt.gcf().set_size_inches(50, 25)
-        pos = nx.spring_layout(G_ud.subgraph(cm | nbr))
-        colors = [edge[2]['suit'] for edge in G_ud.subgraph(cm | nbr).edges(data=True)]
-        nx.draw_networkx(
-            G_ud.subgraph(cm | nbr), edge_cmap=plt.cm.get_cmap('RdYlBu'),
-            edge_color=colors, pos=pos, width=0.5, node_size=50)
-        plt.savefig('/tmp/tmp.png')
-        # id += 1
-        break
+        print(len(cm), cm)
+    if calc_mod:
+        print('模块度: ', nx.algorithms.community.modularity(g_ud, cms))
 
 
 def analyse_evolution_status(G, save_path):
@@ -546,6 +528,43 @@ def nme_gini_example_ticks():
     plt.show()
 
 
+def analyse_evolution_community(G: nx.DiGraph, step, path):
+    """
+    分析演化过程中的社区分布
+    :param G:
+    :param step:
+    :return:
+    """
+    g_ud = G.to_undirected()
+    cm_cof = []
+    graph_size_ranges = range(step, g_ud.number_of_nodes() + 1, step)
+    for sub_graph_size in graph_size_ranges:
+        # 取子图
+        sub_graph = g_ud.subgraph(nodes=range(0, sub_graph_size))
+        communities = list(community.label_propagation_communities(sub_graph))
+        print(communities)
+        print('计算模块度中', '演化时刻:', sub_graph_size)
+        cm_cof.append(
+            (len(communities), community.modularity(sub_graph, communities))
+        )
+        print(cm_cof)
+        # 绘制模块度变化趋势和社区数量变化趋势凸显图线
+        cm_cof_dist = np.array(cm_cof)
+        plt.gcf().set_size_inches(12, 4)
+        plt.subplot(1, 2, 1)
+        plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 0])
+        plt.xlabel('演化时刻')
+        plt.ylabel('社区数量')
+        plt.subplot(1, 2, 2)
+        plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 1])
+        plt.ylim(0, 1)
+        plt.xlabel('演化时刻')
+        plt.ylabel('模块度')
+        plt.gcf().tight_layout()
+        # plt.savefig('%s/模块度演化参数.png')
+        plt.show()
+
+
 @utils.destroy
 def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=None, style=None, **kwargs):
     G = load_from_csv(path=path)
@@ -555,26 +574,26 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
         if type == 0:
             common_lim = 0, 3, -4.3, 0
             # 度数分布
-            # draw_degree_dist(
-            #     G.in_degree, hold=isHold, lbl='In Degree',
-            #     fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
-            #     fit_curve_range2=(0, 1.5),
-            #     fit_func=linear_log_fit, fit_range=(0.5, 1.5, 0.5),
-            #     fit_curve_range1=(0.6, 3),
-            #     save_path=path,
-            #     lim=common_lim,
-            #     G=G
-            # )
-            # draw_degree_dist(
-            #     G.out_degree, hold=isHold, lbl='Out Degree',
-            #     # fit_func2=linear_log_fit, fit_range2=(0, 0.65, 0.25),
-            #     # fit_curve_range2=(0, 1.6),
-            #     # fit_func=linear_log_fit, fit_range=(0.4, 1.8, 0.6),
-            #     # fit_curve_range1=(0.6, 3),
-            #     save_path=path,
-            #     lim=common_lim,
-            #     G=G
-            # )
+            draw_degree_dist(
+                G.in_degree, hold=isHold, lbl='In Degree',
+                fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
+                fit_curve_range2=(0, 1.5),
+                fit_func=linear_log_fit, fit_range=(0.5, 1.5, 0.5),
+                fit_curve_range1=(0.6, 3),
+                save_path=path,
+                lim=common_lim,
+                G=G
+            )
+            draw_degree_dist(
+                G.out_degree, hold=isHold, lbl='Out Degree',
+                # fit_func2=linear_log_fit, fit_range2=(0, 0.65, 0.25),
+                # fit_curve_range2=(0, 1.6),
+                # fit_func=linear_log_fit, fit_range=(0.4, 1.8, 0.6),
+                # fit_curve_range1=(0.6, 3),
+                save_path=path,
+                lim=common_lim,
+                G=G
+            )
             draw_degree_dist(
                 G.degree, hold=isHold, lbl=lbl if lbl else 'Degree',
                 # fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
@@ -591,7 +610,7 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
                 G, save_path=path, hold=isHold,
                 fit_func=linear_log_fit, fit_range=(1, 3, 0),
                 lim=(0, 3, -3.3, 0),
-                sample_count=10000,
+                sample_count=5000,
                 ticks=None)
         elif type == 2:
             plt.subplot(1, 2, 1)
@@ -665,6 +684,9 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
             print('正在转换成pickle...')
             nx.write_gpickle(G, path + '/n6000e27482.gpkl')
 
+        elif type == 15:
+            analyse_evolution_community(G, 200, path=path)
+
 
 # 单元测试
 if __name__ == '__main__':
@@ -673,7 +695,7 @@ if __name__ == '__main__':
     matplotlib.rcParams.update({'font.size': 18})
     # 载入网络数据
     # 效果比较好/stable/Nme
-    # path = '../data/20180202_002604_n20000_e110320_30_k10'
     # path = '../data/stable/NME_2'
-    path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
-    NME(types=[14], isHold=True, path=path)
+    # path = '../data/20180510_220335_n10000_e28688_dta5_600'
+    path = '../data/20180513_103950_n10000_e16439_dta2_600'
+    NME(types=[15], isHold=False, path=path)

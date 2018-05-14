@@ -22,7 +22,8 @@ def er_model(existed=None, isHold=True):
         hold=isHold, lbl='度分布', save_path=save_path, G=G,
         ticks=(
             [800, 1000, 1200], ['$0.8x10^3$', '$10^3$', '$1.2x10^3$'],
-            [0.001, 0.005, 0.01, 0.015, 0.02], ['$10^{-3}$', '$0.5x10^{-2}$', '$10^{-2}$', '$1.5x10^{-2}$', '$2x10^{-2}$']
+            [0.001, 0.005, 0.01, 0.015, 0.02],
+            ['$10^{-3}$', '$0.5x10^{-2}$', '$10^{-2}$', '$1.5x10^{-2}$', '$2x10^{-2}$']
         )
     )
     # 分析聚集系数
@@ -54,7 +55,8 @@ def ws_model(existed=None, isHold=True):
         hold=isHold, lbl='度分布', save_path=save_path, G=G,
         ticks=(
             [500, 600, 700], ['$0.5x10^3$', '$0.6x10^3$', '$0.7x10^3$'],
-            [0.001, 0.01, 0.02, 0.03, 0.04, 0.05], ['$10^{-3}$', '$10^{-2}$', '$2x10^{-2}$', '$3x10^{-2}$', '$4x10^{-2}$', '$5x10^{-2}$']
+            [0.001, 0.01, 0.02, 0.03, 0.04, 0.05],
+            ['$10^{-3}$', '$10^{-2}$', '$2x10^{-2}$', '$3x10^{-2}$', '$4x10^{-2}$', '$5x10^{-2}$']
         )
     )
     # analyser.analyse_clustering_coefficient(
@@ -78,18 +80,24 @@ def ba_model(existed=None, isHold=True):
         analyser.save_graph(G, save_path)
     else:
         G = analyser.load_graph(save_path)
-    analyser.draw_degree_dist(
-        G.degree, process=lambda v: np.log10(v),
-        lim=(0.0, 3, -4.3, 0),
-        fit_func=analyser.linear_log_fit,
-        fit_range=(0.1, 2.2, 0.5),
-        hold=isHold, lbl='度分布', save_path=save_path, G=G
-    )
+    # analyser.draw_degree_dist(
+    #     G.degree, process=lambda v: np.log10(v),
+    #     lim=(0.0, 3, -4.3, 0),
+    #     fit_func=analyser.linear_log_fit,
+    #     fit_range=(0.1, 2.2, 0.5),
+    #     hold=isHold, lbl='度分布', save_path=save_path, G=G
+    # )
     # analyser.analyse_clustering_coefficient(
     #     G, save_path=save_path, sample_count=7000,
     #     fit_func=analyser.linear_log_fit, fit_range=(0, 1.1, 0.20),
     #     ticks=None, lim=(0, 3, -3.3, 0))
     # analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='节点Degree', hold=False)
+    import networkx.algorithms.community as community
+    cms = list(community.label_propagation_communities(G))
+    print(len(cms))
+    for cm in cms:
+        print(len(cm))
+        print(cm)
 
 
 @utils.destroy
@@ -99,15 +107,15 @@ def twitter(existed=None, isHold=True):
     # 取子图
     G_sub = G.subgraph(sorted(list(G.nodes))[30000:50000])
     common_lim = (0, 3, -4.3, 0)
-    analyser.draw_degree_dist(
-        G_sub.in_degree, hold=isHold, lbl='入度分布',
-        fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
-        fit_curve_range2=(0, 2),
-        fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
-        fit_curve_range1=(0.8, 5),
-        lim=common_lim,
-        save_path=save_path, G=G_sub
-    )
+    # analyser.draw_degree_dist(
+    #     G_sub.in_degree, hold=isHold, lbl='入度分布',
+    #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.30),
+    #     fit_curve_range2=(0, 2),
+    #     fit_func=analyser.linear_log_fit, fit_range=(1.5, 2.0, 0.5),
+    #     fit_curve_range1=(0.8, 5),
+    #     lim=common_lim,
+    #     save_path=save_path, G=G_sub
+    # )
     # analyser.draw_degree_dist(
     #     G_sub.out_degree, hold=isHold, lbl='出度分布',
     #     fit_func2=analyser.linear_log_fit, fit_range2=(0, 1.0, 0.35),
@@ -135,6 +143,7 @@ def twitter(existed=None, isHold=True):
     # analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='Degree', hold=True)
     # analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='In Degree', hold=True)
     # analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='Out Degree', hold=True)
+    # analyser.analyse_evolution_community(G, step=200, path='')
 
 
 @utils.destroy
@@ -372,7 +381,7 @@ if __name__ == '__main__':
     # ba_model()
     # ba_model(existed=True, isHold=False)
     '''分析twitter数据集'''
-    # twitter(existed=True, isHold=False)
+    twitter(existed=True, isHold=False)
     '''分析glus数据集'''
     # gplus(existed=True, isHold=False)
     '''分析livejournal数据集'''
@@ -383,4 +392,4 @@ if __name__ == '__main__':
     # email(existed=True, isHold=False)
 
     # degree_layout()
-    degree_in_out_layout()
+    # degree_in_out_layout()

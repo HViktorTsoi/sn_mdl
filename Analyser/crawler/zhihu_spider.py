@@ -101,7 +101,7 @@ class RequestExecutor:
         try:
             parsed_result = json.loads(content)
         except Exception as e:
-            print(content, sys.stderr)
+            print(content, file=sys.stderr)
             raise e
         return parsed_result
 
