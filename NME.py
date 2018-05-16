@@ -310,12 +310,12 @@ def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_com
 if __name__ == '__main__':
     # 存储演化过程特性
     dist = []
-    param_delta = 3
+    param_delta = 7
     param_k = 7
     save_info = 'dta%d_%s' % (param_delta, input('演化关键信息: '))
     network_model = start_evolution(
         # init_graph_size=param_k - 1,
-        init_graph_size=600,
+        init_graph_size=200,
         delta_origin=param_delta,
         max_ntwk_size=10000,
         k=param_k,
