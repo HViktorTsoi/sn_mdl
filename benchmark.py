@@ -369,19 +369,21 @@ def zhihu(existed=None, isHold=True):
 def degree_layout():
     # 设置画布大小
     # 度值和聚集系数
-    models = [er_model, ws_model, ba_model, analyser.NME, zhihu, twitter, gplus, pokec, livej]
-    names = ['Erdos-Renri model', 'Watts Strogatz model', 'Barabási-Albert Model',
-             'NMC Model', 'Zhihu', 'Twitter', 'Google+', 'Pokec', 'LiveJournal']
+    # models = [er_model, ws_model, ba_model, analyser.NME, zhihu, twitter, gplus, pokec, livej]
+    # names = ['Erdos-Renri model', 'Watts Strogatz model', 'Barabási-Albert Model',
+    #          'NMC Model', 'Zhihu', 'Twitter', 'Google+', 'Pokec', 'LiveJournal']
     # 基尼系数
     # models = [er_model, analyser.NME, twitter, gplus, pokec, livej]
     # names = ['Erdos-Renri model', 'NMC Model', 'Twitter', 'Google+', 'Pokec', 'LiveJournal']
     # 去掉大数据集
-    # models = [analyser.NME, analyser.NME, analyser.NME, analyser.NME, analyser.NME, analyser.NME, ]
-    # names = ['Erdos-Renri model', 'NMC Model', 'Twitter', 'Google+', 'Pokec', 'LiveJournal']
+    models = [analyser.NME, analyser.NME, analyser.NME, analyser.NME, analyser.NME, analyser.NME, analyser.NME,
+              analyser.NME, analyser.NME, ]
+    names = ['Erdos-Renri model', 'Watts Strogatz model', 'Barabási-Albert Model',
+             'NMC Model', 'Zhihu', 'Twitter', 'Google+', 'Pokec', 'LiveJournal']
 
     lbls = ['(%s) %s' % (chr(ord('a') + idx), names[idx]) for idx in range(len(models))]
-    rows = 4
-    cols = 2
+    rows = 3
+    cols = 3
     plt.gcf().set_size_inches(4.8 * cols, 3.2 * rows)
     for idx, lbl in enumerate(lbls):
         # 配置子图
@@ -478,7 +480,7 @@ def evolution_community_analyse():
 if __name__ == '__main__':
     path = './data/stable/'
     matplotlib.rcParams.update({'font.size': 18})
-    PROCESS_TYPE = 1
+    PROCESS_TYPE = 0
     PROCESS_TYPE_DEGREE_TYPE = 0
     '''分析ER模型'''
     # er_model()
@@ -498,9 +500,9 @@ if __name__ == '__main__':
     '''分析pokec数据集'''
     # pokec(existed=True, isHold=False)
     '''分析zhihu数据集'''
-    zhihu(existed=True, isHold=False)
+    # zhihu(existed=True, isHold=False)
 
-    # degree_layout()
+    degree_layout()
     # degree_in_out_layout()
     '''分析社区演化趋势'''
     # evolution_community_analyse()
