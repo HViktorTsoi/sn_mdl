@@ -7,6 +7,7 @@ import random
 from builtins import len
 from collections import defaultdict
 
+import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import networkx.algorithms as nxalgo
@@ -98,8 +99,8 @@ def draw_degree_dist(
     # 暂时取消标注
     # plt.legend(loc="upper right")
     print('暂时取消标注')
-    plt.xlabel('Node Degree')
-    plt.ylabel('Probability', labelpad=2)
+    plt.xlabel('节点度值')
+    plt.ylabel('概率', labelpad=2)
     if FIT_CURVE:
         # 曲线拟合
         if fit_func:
@@ -179,7 +180,7 @@ def draw_power_dist(
     # 曲线拟合
     if fit_range:
         linear_log_fit(dist, fit_range=fit_range)
-    plt.xlabel('Node Power')
+    plt.xlabel('信息传播势')
     plt.legend(loc="upper right")
     draw_ticks(direction='p')
     plt.xlim(0, 3)
@@ -190,7 +191,7 @@ def draw_power_dist(
 
 def analyse_power_degree_relation(G, save_path):
     lim = (20000, 20000)
-    param_list = [(G.in_degree, Is, 'g', 'In'), (G.out_degree, Os, 'b', 'Out')]
+    param_list = [(G.in_degree, Is, 'g', '入'), (G.out_degree, Os, 'b', '出')]
     for idx, param in enumerate(param_list):
         dist = []
         for node_id in G.nodes:
@@ -209,12 +210,12 @@ def analyse_power_degree_relation(G, save_path):
         plt.plot([0, lim[0]], [0, k * lim[0]], color='k', linestyle='--', linewidth=1)
         plt.xscale('symlog')
         plt.yscale('symlog')
-        plt.xlabel('%s Degree' % (param[3]))
-        plt.ylabel('%s Power' % (param[3]))
+        plt.xlabel('%s度' % (param[3]))
+        plt.ylabel('%s势' % (param[3]))
         plt.xlim(0, lim[0])
         plt.ylim(0, lim[1])
     plt.gcf().tight_layout()
-    plt.savefig('%s/i18n_节点度势相关性.png' % save_path)
+    plt.savefig('%s/节点度势相关性.png' % save_path)
     plt.show()
 
 
@@ -321,8 +322,8 @@ def analyse_gini_coefficient(G: nx.Graph, calc_type=None, hold=True, lbl='', sav
     # 面积标记
     # plt.text(0.8, 0.7, 'α')
     # plt.text(0.8, 0.1, 'β')
-    plt.xlabel('Ratio of Cumulative Node Number')
-    plt.ylabel('Ratio of Cumulative\nNode Degree')
+    plt.xlabel('累计节点数比')
+    plt.ylabel('累计度值比')
     plt.legend(loc='upper left', fontsize=12)
     if not hold:
         plt.show()
@@ -461,9 +462,9 @@ def analyse_edge_activity_map(G, ctof, save_path):
     plt.colorbar(sc)
     plt.xscale('symlog')
     plt.yscale('symlog')
-    plt.xlabel('Node ID(n)')
-    plt.ylabel('Node ID(n)')
-    plt.savefig('%s/%s.png' % (save_path, 'i18n_边活跃度热力图'))
+    plt.xlabel('节点标识(n)')
+    plt.ylabel('节点标识(n)')
+    plt.savefig('%s/%s.png' % (save_path, '边活跃度热力图'))
     plt.show()
 
 
@@ -477,18 +478,18 @@ def analyse_attach_trend(G):
         plt.scatter(x, slt_value_domain[:, 1], s=8, marker='x', color='g', label='Suitability of Chosen Node')
         plt.scatter(x, slt_value_domain[:, 0], s=5, label='Average Suitability')
         plt.ylim(0, 1.1)
-        plt.xlabel('Evolution TTicks(Edge Number)\n(a)', linespacing=2)
-        plt.ylabel('Domain Suitability')
+        plt.xlabel('演化时刻\n(a)', linespacing=2)
+        plt.ylabel('领域匹配度')
         plt.legend()
         # 画出对比分布图
         plt.subplot(122)
         plt.scatter(slt_value_domain[:, 0], slt_value_domain[:, 1], s=5)
         plt.plot([0, 1], [0, 1], color='k', linestyle='--')
         plt.ylim(0, 1.1)
-        plt.xlabel('Average Suitability\n(b)', linespacing=2)
-        plt.ylabel('Suitability of Chosen Node')
+        plt.xlabel('平均匹配度\n(b)', linespacing=2)
+        plt.ylabel('被选择节点匹配度')
         plt.gcf().tight_layout()
-        plt.savefig(path + '/i18n_匹配度依附趋势.png')
+        plt.savefig(path + '/匹配度依附趋势.png')
         plt.show()
 
     with open('/tmp/rst.pkl', 'rb') as pkl_file:
@@ -638,7 +639,7 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
             common_lim = 0, 3, -4.3, 0
             # 度数分布
             draw_degree_dist(
-                G.degree, hold=isHold, lbl=lbl if lbl else 'Degree',
+                G.degree, hold=isHold, lbl=lbl if lbl else '度值',
                 fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
                 fit_curve_range2=(0, 1.7),
                 fit_func=linear_log_fit, fit_range=(0.7, 2, 0.6),
@@ -650,7 +651,7 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
             )
             if degree_subtype == 1:
                 draw_degree_dist(
-                    G.in_degree, hold=isHold, lbl='In Degree',
+                    G.in_degree, hold=isHold, lbl='入度',
                     fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
                     fit_curve_range2=(0, 1.5),
                     fit_func=linear_log_fit, fit_range=(0.5, 1.5, 0.5),
@@ -660,7 +661,7 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
                     G=G
                 )
                 draw_degree_dist(
-                    G.out_degree, hold=isHold, lbl='Out Degree',
+                    G.out_degree, hold=isHold, lbl='出度',
                     fit_func2=linear_log_fit, fit_range2=(0, 0.65, 0.25),
                     fit_curve_range2=(0, 1.6),
                     fit_func=linear_log_fit, fit_range=(0.4, 1.8, 0.6),
@@ -679,16 +680,16 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
         elif type == 2:
             plt.subplot(1, 2, 1)
             draw_power_dist(G.nodes(data=True), type=Is, fit_range=(0.3, 1.5, 0.1), lbl='In', style=('g', 'x', 10))
-            plt.ylabel('Probability')
+            plt.ylabel('概率')
             plt.subplot(1, 2, 2)
             draw_power_dist(G.nodes(data=True), type=Os, fit_range=(0.6, 1.9, 0.05), lbl='Out', style=('b', 'v', 10))
             if path:
-                plt.savefig('%s/%s.png' % (path, 'i18n_节点势分布'))
+                plt.savefig('%s/%s.png' % (path, '节点势分布'))
             plt.show()
         elif type == 3:
-            analyse_gini_coefficient(G, save_path=path, lbl='Degree', hold=isHold)
-            analyse_gini_coefficient(G, calc_type='in', save_path=path, lbl='In Degree', hold=isHold)
-            analyse_gini_coefficient(G, calc_type='out', save_path=path, lbl='Out Degree', hold=isHold)
+            analyse_gini_coefficient(G, save_path=path, lbl='度值', hold=isHold)
+            analyse_gini_coefficient(G, calc_type='in', save_path=path, lbl='入度', hold=isHold)
+            analyse_gini_coefficient(G, calc_type='out', save_path=path, lbl='出度', hold=isHold)
             # nme_gini_example_ticks()
         elif type == 4:
             analyse_core(G)
@@ -720,7 +721,7 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
             NME(types=[0], isHold=True, path='../data/20180202_002604_n20000_e110320_30_k10', style='b^',
                 lbl='$\epsilon=30$')
             NME(types=[0], isHold=True, path='../data/20180131_122403_n20000_e39998_d1', style='rx', lbl='$\epsilon=1$')
-            plt.savefig('%s/i18n_度随参数分布.png' % path)
+            plt.savefig('%s/度随参数分布.png' % path)
             plt.show()
         elif type == 12:
             G = G.subgraph(nodes=random.sample(G.nodes, 2000))
@@ -732,10 +733,10 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
         elif type == 13:
             import matplotlib.image as mpimg
             figs = [
-                # (mpimg.imread('../data/stable/i18n_综合度分布曲线.png'), 6.4 * 2, 4.8 * 4),
+                # (mpimg.imread('../data/stable/综合度分布曲线.png'), 6.4 * 2, 4.8 * 4),
                 # (mpimg.imread('../data/stable/综合聚集系数分布曲线_8.png'), 6.4 * 2, 4.8 * 4),
-                # (mpimg.imread('../data/stable/i18n_综合洛伦兹曲线_6.png'), 6.4 * 3, 4.8 * 2),
-                # (mpimg.imread('../data/stable/NME_2/i18n_匹配度依附趋势.png'), 6.4 * 2, 4.8),
+                # (mpimg.imread('../data/stable/综合洛伦兹曲线_6.png'), 6.4 * 3, 4.8 * 2),
+                # (mpimg.imread('../data/stable/NME_2/匹配度依附趋势.png'), 6.4 * 2, 4.8),
                 # (mpimg.imread('../data/stable/NME_2/Link to cc.png'), 12.8, 9.6),
                 (mpimg.imread('../data/stable/NME_2/Link to diameter.png'), 12.8, 9.6),
             ]
@@ -754,8 +755,6 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
 
 # 单元测试
 if __name__ == '__main__':
-    import matplotlib
-
     matplotlib.rcParams.update({'font.size': 18})
     # 载入网络数据
     # 效果比较好/stable/Nme

@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
@@ -46,7 +46,7 @@ def er_model(existed=None, isHold=True):
             hold=isHold
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='Degree', hold=True)
+        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='度值', hold=True)
     elif PROCESS_TYPE == 3:
         analyser.draw_graph(G)
 
@@ -161,9 +161,9 @@ def twitter(existed=None, isHold=True):
             ticks=None, lim=(0, 3, -3.3, 0)
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='Degree', hold=True)
-        analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='In Degree', hold=True)
-        analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='Out Degree', hold=True)
+        analyser.analyse_gini_coefficient(G_sub, save_path=save_path, lbl='度值', hold=True)
+        analyser.analyse_gini_coefficient(G_sub, calc_type='out', save_path=save_path, lbl='入度', hold=True)
+        analyser.analyse_gini_coefficient(G_sub, calc_type='in', save_path=save_path, lbl='出度', hold=True)
     elif PROCESS_TYPE == 4:
         # G = G.subgraph(sorted(list(G.nodes))[10000:20000])
         analyser.analyse_community_evolution(G, step=1000, path='')
@@ -213,9 +213,9 @@ def gplus(existed=None, isHold=True):
             ticks=None, lim=(0, 3, -3.3, 0)
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='In Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='Out Degree', hold=True)
+        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='度值', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='入度', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='出度', hold=True)
     elif PROCESS_TYPE == 4:
         analyser.analyse_community_evolution(G, step=200, path='')
 
@@ -262,9 +262,9 @@ def livej(existed=None, isHold=True):
             ticks=None, lim=(0, 3, -3.3, 0)
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='In Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='Out Degree', hold=True)
+        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='度值', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='入度', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='出度', hold=True)
     elif PROCESS_TYPE == 4:
         analyser.analyse_community_evolution(G, step=200, path='')
 
@@ -311,9 +311,9 @@ def pokec(existed=None, isHold=True):
             ticks=None, lim=(0, 3, -3.3, 0)
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='In Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='Out Degree', hold=True)
+        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='度值', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='入度', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='出度', hold=True)
     elif PROCESS_TYPE == 4:
         analyser.analyse_community_evolution(G, step=200, path='')
 
@@ -359,9 +359,9 @@ def zhihu(existed=None, isHold=True):
             hold=isHold
         )
     elif PROCESS_TYPE == 2:
-        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='In Degree', hold=True)
-        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='Out Degree', hold=True)
+        analyser.analyse_gini_coefficient(G, save_path=save_path, lbl='度值', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='in', save_path=save_path, lbl='入度', hold=True)
+        analyser.analyse_gini_coefficient(G, calc_type='out', save_path=save_path, lbl='出度', hold=True)
     elif PROCESS_TYPE == 4:
         analyser.analyse_community_evolution(G, step=200, path='')
 
@@ -414,8 +414,8 @@ def degree_in_out_layout():
     isHold = True
     save_path = ''
     data_list = (
-        [nme.in_degree, twitter.in_degree, gplus.in_degree, zhihu.in_degree, ba.degree, '(a) In Degree'],
-        [nme.out_degree, twitter.out_degree, gplus.out_degree, zhihu.out_degree, ba.degree, '(b) Out Degree'],
+        [nme.in_degree, twitter.in_degree, gplus.in_degree, zhihu.in_degree, ba.degree, '(a) 入度'],
+        [nme.out_degree, twitter.out_degree, gplus.out_degree, zhihu.out_degree, ba.degree, '(b) 出度'],
     )
     analyser.FIT_CURVE = False
     plt.gcf().set_size_inches(6.4 * 2, 4.8)
@@ -451,10 +451,10 @@ def degree_in_out_layout():
             style='c>',
             save_path=save_path, G=gplus
         )
-        plt.xlabel('Node Degree\n%s' % data[4], linespacing=2)
+        plt.xlabel('节点度值\n%s' % data[4], linespacing=2)
         plt.legend(loc='upper right', fontsize=14)
     plt.gcf().tight_layout()
-    plt.savefig('data/stable/i18n_出入度分布对比.png')
+    plt.savefig('data/stable/出入度分布对比.png')
     plt.show()
 
 
