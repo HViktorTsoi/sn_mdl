@@ -394,7 +394,7 @@ def degree_layout():
         origin_lbl = plt.gca().xaxis.get_label().get_text()
         plt.xlabel('%s\n%s' % (origin_lbl, lbl), linespacing=2)
     plt.gcf().tight_layout()
-    plt.savefig('data/stable/i18n_综合度分布曲线.png')
+    plt.savefig('data/stable/综合度分布曲线.png')
     plt.show()
 
 

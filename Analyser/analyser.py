@@ -96,7 +96,7 @@ def draw_degree_dist(
         label=lbl,
     )
     # 暂时取消标注
-    plt.legend(loc="upper right")
+    # plt.legend(loc="upper right")
     print('暂时取消标注')
     plt.xlabel('Node Degree')
     plt.ylabel('Probability', labelpad=2)
@@ -628,7 +628,8 @@ def analyse_community_evolution(G: nx.DiGraph, step, path=''):
 
 
 @utils.destroy
-def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=None, style=None, **kwargs):
+def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stable/NME_2', lbl=None, style=None,
+        **kwargs):
     G = load_from_csv(path=path)
     '''分析NME模型'''
     # 类型
@@ -637,36 +638,37 @@ def NME(existed=None, types=(0,), isHold=True, path='data/stable/NME_2', lbl=Non
             common_lim = 0, 3, -4.3, 0
             # 度数分布
             draw_degree_dist(
-                G.in_degree, hold=isHold, lbl='In Degree',
-                fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
-                fit_curve_range2=(0, 1.5),
-                fit_func=linear_log_fit, fit_range=(0.5, 1.5, 0.5),
-                fit_curve_range1=(0.6, 3),
-                save_path=path,
-                lim=common_lim,
-                G=G
-            )
-            draw_degree_dist(
-                G.out_degree, hold=isHold, lbl='Out Degree',
-                # fit_func2=linear_log_fit, fit_range2=(0, 0.65, 0.25),
-                # fit_curve_range2=(0, 1.6),
-                # fit_func=linear_log_fit, fit_range=(0.4, 1.8, 0.6),
-                # fit_curve_range1=(0.6, 3),
-                save_path=path,
-                lim=common_lim,
-                G=G
-            )
-            draw_degree_dist(
                 G.degree, hold=isHold, lbl=lbl if lbl else 'Degree',
-                # fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
-                # fit_curve_range2=(0, 1.7),
-                # fit_func=linear_log_fit, fit_range=(0.7, 2, 0.6),
-                # fit_curve_range1=(0.8, 3),
+                fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
+                fit_curve_range2=(0, 1.7),
+                fit_func=linear_log_fit, fit_range=(0.7, 2, 0.6),
+                fit_curve_range1=(0.8, 3),
                 save_path=path,
                 lim=common_lim,
                 style=style,
                 G=G
             )
+            if degree_subtype == 1:
+                draw_degree_dist(
+                    G.in_degree, hold=isHold, lbl='In Degree',
+                    fit_func2=linear_log_fit, fit_range2=(0, 0.7, 0.30),
+                    fit_curve_range2=(0, 1.5),
+                    fit_func=linear_log_fit, fit_range=(0.5, 1.5, 0.5),
+                    fit_curve_range1=(0.6, 3),
+                    save_path=path,
+                    lim=common_lim,
+                    G=G
+                )
+                draw_degree_dist(
+                    G.out_degree, hold=isHold, lbl='Out Degree',
+                    fit_func2=linear_log_fit, fit_range2=(0, 0.65, 0.25),
+                    fit_curve_range2=(0, 1.6),
+                    fit_func=linear_log_fit, fit_range=(0.4, 1.8, 0.6),
+                    fit_curve_range1=(0.6, 3),
+                    save_path=path,
+                    lim=common_lim,
+                    G=G
+                )
         elif type == 1:
             analyse_clustering_coefficient(
                 G, save_path=path, hold=isHold,
