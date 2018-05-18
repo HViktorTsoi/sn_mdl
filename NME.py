@@ -161,12 +161,12 @@ def choose_node(G, node_id_list, new_node_id, type):
         if rnd <= choose_factor:
             log_status("选中了节点: {}".format(node_id))
             # 记录选边信息
-            # dist.append({
-            #     'cur': new_node_id,
-            #     'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
-            #                  for node_id in node_id_list if node_id != new_node_id},
-            #     'chosen': node_id
-            # })
+            dist.append({
+                'cur': new_node_id,
+                'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
+                             for node_id in node_id_list if node_id != new_node_id},
+                'chosen': node_id
+            })
             return node_id
         else:
             rnd -= choose_factor
@@ -310,13 +310,13 @@ def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_com
 if __name__ == '__main__':
     # 存储演化过程特性
     dist = []
-    param_delta = 5
+    param_delta = 10
     param_k = 7
     save_info = 'dta%d_%s' % (param_delta, input('演化关键信息: '))
     network_model = start_evolution(
-        init_graph_size=200,
+        init_graph_size=10,
         delta_origin=param_delta,
-        max_ntwk_size=5000,
+        max_ntwk_size=10000,
         k=param_k,
         analyse_community=False
     )

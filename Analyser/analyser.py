@@ -15,6 +15,7 @@ import numpy as np
 from networkx.algorithms import community
 from scipy import stats
 from scipy.optimize import curve_fit
+from sqlalchemy.sql.functions import current_date
 
 import Analyser.utils as utils
 from Defination import *
@@ -52,9 +53,8 @@ def draw_graph(G: nx.Graph, sample_count=1000, save_path: str = '', width: int =
                is_hold=True):
     nodes_list = random.sample(G.nodes, sample_count)
     G = G.subgraph(range(sample_count))
-    fig = plt.gcf()
-    fig.set_size_inches(width, height)
-    nx.draw_networkx(G, pos=nx.spring_layout(G), with_labels=False, node_size=40, linewidths=0.4)
+    nx.draw_networkx(G, pos=nx.spring_layout(G), with_labels=False,
+                     node_color='r', node_size=26, linewidths=0.3)
     if not is_hold:
         if target == 's':
             plt.show()
@@ -97,7 +97,7 @@ def draw_degree_dist(
         label=lbl,
     )
     # 暂时取消标注
-    # plt.legend(loc="upper right")
+    plt.legend(loc="upper right")
     print('暂时取消标注')
     plt.xlabel('节点度值')
     plt.ylabel('概率', labelpad=2)
@@ -275,7 +275,8 @@ def analyse_clustering_coefficient(
         fit_func(cc_dist, fit_range=fit_range, fit_curve_range=fit_curve_range, lim=lim, p=p)
     plt.xlabel('节点度值')
     plt.ylabel('系数', labelpad=-4)
-    plt.legend()
+    print('取消标注')
+    # plt.legend()
     if ticks:
         draw_ticks(custom=ticks)
     else:
@@ -464,6 +465,7 @@ def analyse_edge_activity_map(G, ctof, save_path):
     plt.yscale('symlog')
     plt.xlabel('节点标识(n)')
     plt.ylabel('节点标识(n)')
+    plt.tight_layout()
     plt.savefig('%s/%s.png' % (save_path, '边活跃度热力图'))
     plt.show()
 
@@ -475,8 +477,8 @@ def analyse_attach_trend(G):
         # 画出相对分布图
         plt.subplot(121)
         x = np.arange(len(slt_value_domain))
-        plt.scatter(x, slt_value_domain[:, 1], s=8, marker='x', color='g', label='Suitability of Chosen Node')
-        plt.scatter(x, slt_value_domain[:, 0], s=5, label='Average Suitability')
+        plt.scatter(x, slt_value_domain[:, 1], s=8, marker='x', color='g', label='被选中节点的匹配度')
+        plt.scatter(x, slt_value_domain[:, 0], s=5, label='平均匹配度')
         plt.ylim(0, 1.1)
         plt.xlabel('演化时刻\n(a)', linespacing=2)
         plt.ylabel('领域匹配度')
@@ -531,19 +533,78 @@ def nme_gini_example_ticks():
     plt.show()
 
 
-def analyse_community_evolution(G: nx.DiGraph, step, path=''):
+def draw_community_status(
+        cm_cof=None,
+        cm_size_dist=None,
+        segment_range=None,
+        step=200,
+        total_rows=6, cur_row=1, lbl='', is_hold=False
+):
+    """
+    绘制社区数量百年化趋势、数量分布、模块度
+    :return:
+    """
+    hatch_list = '-+x.oO.\\*'
+    label_list = ['%d-%d节点' % (seg + 1, segment_range[idx + 1])
+                  if idx < len(segment_range) - 1 else '%d节点以上' % (seg + 1)
+                  for idx, seg in enumerate(segment_range)]
+    # 绘制模块度变化趋势和社区数量变化趋势凸显图线
+    cm_cof_dist = np.array(cm_cof)
+    plt.subplot(total_rows, 3, cur_row * 3 + 1)
+    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 0])
+    plt.ylabel('社区数量')
+    # 限制坐标轴的最大社区数量
+    plt.ylim(0, max(cm_cof_dist[:, 0]) + 50)
+    plt.subplot(total_rows, 3, cur_row * 3 + 2)
+    # 绘制社区分布
+    # 取第一维的keys 即演化时间作为横坐标刻度
+    # 因为这里使用了jsonencode keys都变成字符串了 所以要转型
+    x = np.array(list(int(k) for k in cm_size_dist[0].keys()))
+    # 定义dloat类型的矩阵存储每个演化时刻各个社区的数量区间
+    y_list = np.array(
+        [np.array(
+            list(cm_size_dist[idx].values()),
+            dtype=np.float
+        ) for idx in range(len(segment_range))]
+    )
+    # 遍历列 对每列的y值进行比例计算
+    for col in range(y_list.shape[1]):
+        y_list[:, col] /= sum(y_list[:, col])
+    print(x, y_list)
+    # 设置堆叠图的bottom
+    bottom_sum = np.zeros(len(x))
+    # 绘制堆叠柱状图
+    for idx in range(len(segment_range)):
+        plt.bar(
+            x, y_list[idx],
+            bottom=bottom_sum,
+            width=max(x) / 25,
+            label=label_list[idx],
+            hatch=hatch_list[idx]
+        )
+        bottom_sum += y_list[idx]
+    plt.xlabel('演化时刻\n' + lbl)
+    plt.ylabel('社区数量分布')
+    plt.legend(loc='lower left', fontsize=14)
+    plt.subplot(total_rows, 3, cur_row * 3 + 3)
+    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 1])
+    plt.ylim(0, 1)
+    plt.ylabel('模块度')
+    if not is_hold:
+        plt.show()
+
+
+def analyse_community_evolution(
+        G: nx.DiGraph,
+        segment_range=None,  # 分段区间
+        max_analyse_size=3000, step=200
+):
     """
     分析演化过程中的社区分布
     :param G:
     :param step:
     :return:
     """
-    # 分段区间
-    segment_range = (0, 3, 5, 10, 100, 500)
-    hatch_list = '-+x.oO.\\*'
-    label_list = ['%d-%d节点' % (seg + 1, segment_range[idx + 1])
-                  if idx < len(segment_range) - 1 else '%d节点以上' % (seg + 1)
-                  for idx, seg in enumerate(segment_range)]
 
     def count_segment(length):
         """
@@ -563,10 +624,17 @@ def analyse_community_evolution(G: nx.DiGraph, step, path=''):
     cm_cof = []
     # 不同大小的社区数量分布
     cm_size_dist = defaultdict(lambda: defaultdict(int))
+
     for sub_graph_size in graph_size_ranges:
+        if sub_graph_size > max_analyse_size:
+            break
         # 取节点编号连续的子图
         sub_graph = g_ud.subgraph(nodes=sorted(list(g_ud.nodes))[0:sub_graph_size])
         communities = list(community.label_propagation_communities(sub_graph))
+        print('计算模块度中', '演化时刻:', sub_graph_size)
+        cm_cof.append(
+            (len([_ for _ in communities if len(_) > 1]), community.modularity(sub_graph, communities))
+        )
         if sub_graph_size % 1000 == 0:
             # 计算社区数量分布
             # 将当前演化时刻各分段的社区数量初始化成0
@@ -577,60 +645,17 @@ def analyse_community_evolution(G: nx.DiGraph, step, path=''):
                 if len(cm) > 1:
                     count_segment(len(cm))
             print(cm_size_dist)
-            # 绘制社区分布
-            x = np.array(list(cm_size_dist[0].keys()))
-            # 定义dloat类型的矩阵存储每个演化时刻各个社区的数量区间
-            y_list = np.array(
-                [np.array(
-                    list(cm_size_dist[idx].values()),
-                    dtype=np.float
-                ) for idx in range(len(segment_range))]
-            )
-            # 遍历列 对每列的y值进行比例计算
-            for col in range(y_list.shape[1]):
-                y_list[:, col] /= sum(y_list[:, col])
-            print(x, y_list)
-            # 设置堆叠图的bottom
-            bottom_sum = np.zeros(len(x))
-            # 绘制堆叠柱状图
-            for idx in range(len(segment_range)):
-                plt.bar(
-                    x, y_list[idx],
-                    bottom=bottom_sum,
-                    width=sub_graph_size / 25,
-                    label=label_list[idx],
-                    hatch=hatch_list[idx]
-                )
-                bottom_sum += y_list[idx]
-            plt.xlabel('演化时刻')
-            plt.ylabel('社区数量')
-            plt.legend(loc='lower left', fontsize=14)
-            plt.show()
-        print('计算模块度中', '演化时刻:', sub_graph_size)
-        cm_cof.append(
-            (len([_ for _ in communities if len(_) > 1]), community.modularity(sub_graph, communities))
-            # (len([_ for _ in communities if len(_) > 1]), 1)
-        )
-        # 绘制模块度变化趋势和社区数量变化趋势凸显图线
-        cm_cof_dist = np.array(cm_cof)
-        plt.gcf().set_size_inches(12, 4)
-        plt.subplot(1, 2, 1)
-        plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 0])
-        plt.xlabel('演化时刻')
-        plt.ylabel('社区数量')
-        plt.subplot(1, 2, 2)
-        plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 1])
-        plt.ylim(0, 1)
-        plt.xlabel('演化时刻')
-        plt.ylabel('模块度')
-        plt.gcf().tight_layout()
-        # plt.savefig('%s/模块度演化参数.png')
-        plt.show()
+    return json.dumps(
+        {'cof': cm_cof, 'size_dist': cm_size_dist}
+    )
 
 
 @utils.destroy
-def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stable/NME_2', lbl=None, style=None,
+def NME(existed=None, types=json.loads('[%s]' % input('输入要分析的项目: ')), degree_subtype=0,
+        isHold=True, path='data/stable/NME_2', lbl=None, style=None,
         **kwargs):
+    if not types:
+        types = [0]
     G = load_from_csv(path=path)
     '''分析NME模型'''
     # 类型
@@ -678,11 +703,13 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
                 sample_count=5000,
                 ticks=None)
         elif type == 2:
+            plt.gcf().set_size_inches(6.4, 5)
             plt.subplot(1, 2, 1)
-            draw_power_dist(G.nodes(data=True), type=Is, fit_range=(0.3, 1.5, 0.1), lbl='In', style=('g', 'x', 10))
+            draw_power_dist(G.nodes(data=True), type=Is, fit_range=(0.3, 1.5, 0.1), lbl='入势', style=('g', 'x', 10))
             plt.ylabel('概率')
             plt.subplot(1, 2, 2)
-            draw_power_dist(G.nodes(data=True), type=Os, fit_range=(0.6, 1.9, 0.05), lbl='Out', style=('b', 'v', 10))
+            draw_power_dist(G.nodes(data=True), type=Os, fit_range=(0.6, 1.9, 0.05), lbl='出势', style=('b', 'v', 10))
+            plt.tight_layout()
             if path:
                 plt.savefig('%s/%s.png' % (path, '节点势分布'))
             plt.show()
@@ -715,21 +742,19 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
         elif type == 10:
             analyse_power_degree_relation(G, save_path=path)
         elif type == 11:
+            global FIT_CURVE
             FIT_CURVE = False
+            plt.gcf().set_size_inches(6.4, 5)
             NME(types=[0], isHold=True, path='../data/20180129_125317_n20000_e74780_delta10_k10', style='go',
                 lbl='$\epsilon=10$')
             NME(types=[0], isHold=True, path='../data/20180202_002604_n20000_e110320_30_k10', style='b^',
                 lbl='$\epsilon=30$')
             NME(types=[0], isHold=True, path='../data/20180131_122403_n20000_e39998_d1', style='rx', lbl='$\epsilon=1$')
+            plt.tight_layout()
             plt.savefig('%s/度随参数分布.png' % path)
             plt.show()
         elif type == 12:
-            G = G.subgraph(nodes=random.sample(G.nodes, 2000))
-            print(G.nodes)
-            plt.gcf().set_size_inches(20, 10)
-            nx.draw_networkx(G, nx.spring_layout(G), width=0.5, node_size=50, font_size=5)
-            plt.savefig('/tmp/network.png')
-            plt.show()
+            draw_graph(G)
         elif type == 13:
             import matplotlib.image as mpimg
             figs = [
@@ -750,7 +775,7 @@ def NME(existed=None, types=(0,), degree_subtype=0, isHold=True, path='data/stab
             nx.write_gpickle(G, path + '/n6000e27482.gpkl')
 
         elif type == 15:
-            analyse_community_evolution(G, 500, path=path)
+            analyse_community_evolution(G, step=500, path=path)
 
 
 # 单元测试
@@ -758,7 +783,8 @@ if __name__ == '__main__':
     matplotlib.rcParams.update({'font.size': 18})
     # 载入网络数据
     # 效果比较好/stable/Nme
-    # path = '../data/stable/NME_2'
+    path = '../data/stable/NME_2'
+    # path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
     # path = '../data/20180510_220335_n10000_e28688_dta5_600'
-    path = '../data/20180510_220335_n10000_e28688_dta5_600'
-    NME(types=[15], isHold=False, path=path)
+    # path = '../data/20180510_220335_n10000_e28688_dta5_600'
+    NME(types=[5], isHold=False, path=path)
