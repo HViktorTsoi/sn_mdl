@@ -13,6 +13,7 @@ from collections import defaultdict
 import pickle
 
 import Analyser.analyser as analyser
+from Analyser.crawler.zhihu_spider import RedisQueue
 from Defination import *
 
 
@@ -60,8 +61,9 @@ def init_network(init_graph_size, init_weight, k):
 
 def add_new_edge(G, f, t, weight=1):
     G.add_edge(f, t, w=weight)
-    if param_delta == 1:
-        G.add_edge(t, f, w=weight)
+    # 此处取消判断e是否为1 从而变为无向图的操作
+    # if param_delta == 1:
+    #     G.add_edge(t, f, w=weight)
     update_node_power(G, f)
     update_node_power(G, t)
 
@@ -161,12 +163,12 @@ def choose_node(G, node_id_list, new_node_id, type):
         if rnd <= choose_factor:
             log_status("选中了节点: {}".format(node_id))
             # 记录选边信息
-            dist.append({
-                'cur': new_node_id,
-                'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
-                             for node_id in node_id_list if node_id != new_node_id},
-                'chosen': node_id
-            })
+            # dist.append({
+            #     'cur': new_node_id,
+            #     'adj_suit': {node_id: calc_domain_suitability(nodes[new_node_id][D], nodes[node_id][D])
+            #                  for node_id in node_id_list if node_id != new_node_id},
+            #     'chosen': node_id
+            # })
             return node_id
         else:
             rnd -= choose_factor
@@ -203,11 +205,24 @@ def save_graph(G, info):
     return save_path
 
 
-def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_community=False):
+def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_community=False, uuid=None):
     G = init_network(init_graph_size=init_graph_size, init_weight=1, k=k)
+    # 如果存在uuid 则初始化redis队列
+    if uuid:
+        G.graph['rq'] = RedisQueue(db_name=f'NME_{uuid}')
     while G.number_of_nodes() < max_ntwk_size:
         # 添加一个节点，并且按照入势选择网络中的一个节点进行连接
         new_node_id = add_new_node(G, k)
+        # 每隔一段时间将网络信息放入队列
+        if G.graph['rq'] and new_node_id % 500 == 0:
+            # 将网络拓扑信息加入队列
+            G.graph['rq'].push(json.dumps({
+                # 'nodes': [{'id': node_id, 'name': node_id} for node_id in G.nodes],
+                # 'links': [{'source': edge[0], 'target': edge[1]} for edge in G.edges],
+                'nodes': list(G.nodes),
+                'links': list(G.edges),
+                'dist': None,
+            }))
         # 如果开启社区分析 则分析社区
         if analyse_community and new_node_id % 1000 == 0:
             analyser.analyse_communities(G, calc_mod=True)

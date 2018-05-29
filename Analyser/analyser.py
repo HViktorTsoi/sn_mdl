@@ -695,7 +695,8 @@ def analyse_community_evolution(
 
 
 @utils.destroy
-def NME(existed=None, types=json.loads('[%s]' % input('输入要分析的项目: ')), degree_subtype=0,
+# def NME(existed=None, types=json.loads('[%s]' % input('输入要分析的项目: ')), degree_subtype=0,
+def NME(existed=None, types=None, degree_subtype=0,
         isHold=True, path='data/stable/NME_2', lbl=None, style=None,
         **kwargs):
     if not types:
