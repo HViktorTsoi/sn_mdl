@@ -36,7 +36,7 @@ class RedisQueue:
     def pop(self):
         # 如果长度不为0
         if self.size():
-            self._r.lpop(self._db_name)
+            return self._r.lpop(self._db_name)
 
     @property
     def top(self):
