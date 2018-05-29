@@ -470,7 +470,7 @@ def degree_in_out_layout():
 
 
 @utils.destroy
-def evolution_community_analyse():
+def evolution_community_analyse(generate=False):
     """
     分析社区演化趋势
     :return:
@@ -505,7 +505,7 @@ def evolution_community_analyse():
     del gplus
     gc.collect()
     # 标签列表
-    lbl_list = ['BA模型', 'ER模型', 'WS模型', 'NME模型', 'Twitter', 'Google+']
+    lbl_list = ['Eedos-Renyi模型', 'Watts Strogatz模型', 'Barabási-Albert模型', 'NME模型', 'Twitter', 'Google+']
     title = '不同数据集社区演化趋势'
 
     # 使用多进程进行计算
@@ -514,8 +514,6 @@ def evolution_community_analyse():
     common_segment_range = (0, 3, 5, 10, 100, 500)
     common_step = 500
     cm_status_list = []
-    # 设置图像大小
-    plt.gcf().set_size_inches(6.4 * 3, 4 * len(graph_list))
     for idx, G in enumerate(graph_list):
         # 将结果加入
         cm_status_list.append(
@@ -534,6 +532,8 @@ def evolution_community_analyse():
         file.write(
             json.dumps([rst.get() for rst in cm_status_list])
         )
+    # 设置图像大小
+    plt.gcf().set_size_inches(6.4 * 3, 4 * len(graph_list))
     # 获取多线程执行结果并绘图
     for idx, cm_status in enumerate(cm_status_list):
         # 对于每一个的计算结果 绘制相应行的图像
@@ -553,6 +553,47 @@ def evolution_community_analyse():
     plt.gcf().tight_layout()
     plt.savefig('./data/stable/%s.png' % title)
     # plt.show()
+
+
+def evolution_community_analyse_from_exist_data():
+    common_segment_range = (0, 3, 5, 10, 100, 500)
+    common_step = 500
+    info_list = [{
+        'lbl_list': [r'$N_0=%d,\epsilon=%d$' % (n, e) for n in [200, 600] for e in [3, 5, 7]],
+        'title': '不同参数社区演化趋势'
+    }, {
+        'lbl_list': ['Eedos-Renyi模型', 'Watts Strogatz模型', 'Barabási-Albert模型', 'NME模型', 'Twitter', 'Google+'],
+        'title': '不同数据集社区演化趋势'
+    }
+
+    ]
+    for info in info_list:
+        title = info['title']
+        lbl_list = info['lbl_list']
+        with open('./data/stable/community_%s.json' % title, 'r') as file:
+            cm_status_list = []
+            cm_status_list = json.loads(file.read())
+            # 设置图像大小
+            plt.gcf().set_size_inches(6.4 * 3, 4 * len(lbl_list))
+            # 获取多线程执行结果并绘图
+            for idx, cm_status in enumerate(cm_status_list):
+                # 对于每一个的计算结果 绘制相应行的图像
+                cm_status = json.loads(cm_status)
+                # 绘图
+                analyser.draw_community_status(
+                    cm_cof=cm_status['cof'],
+                    # 因为这里使用了jsonencode keys都变成字符串了 所以要转型
+                    cm_size_dist={int(k): v for k, v in cm_status['size_dist'].items()},
+                    segment_range=common_segment_range,
+                    total_rows=len(lbl_list),
+                    cur_row=idx,
+                    step=common_step,
+                    is_hold=True,
+                    lbl='(%d) %s' % (idx + 1, lbl_list[idx])
+                )
+            plt.gcf().tight_layout()
+            plt.savefig('./data/stable/%s.png' % title)
+            plt.show()
 
 
 if __name__ == '__main__':
@@ -585,4 +626,6 @@ if __name__ == '__main__':
     '''分析出度入度分布'''
     # degree_in_out_layout()
     '''分析社区演化趋势'''
-    evolution_community_analyse()
+    # evolution_community_analyse()
+    '''分析社区演化趋势 从已有数据集中'''
+    evolution_community_analyse_from_exist_data()

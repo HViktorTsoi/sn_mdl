@@ -48,6 +48,42 @@ def draw_ticks(custom=None, direction='n'):
             plt.yticks([4, 3, 2, 1, 0], ['$10^{-4}$', '$10^{-3}$', '$10^{-2}$', '$10^{-1}$', '$10^0$'])
 
 
+def draw_diameter_curve(save_path):
+    # 聚集系数
+    with open("%s/cc_evo_data.json" % save_path, 'r') as file:
+        cc_dist = json.loads(file.read())['cc']
+        cc_dist = {int(k): float(v) for k, v in cc_dist.items() if float(k) >= 12}
+        cc_dist = np.array(list(cc_dist.items()))
+        plt.plot(cc_dist[:, 0], cc_dist[:, 1], color='b')
+        plt.hlines(0.18, 0, 20000, colors='gray', linestyles='--', linewidths=1, label='演化稳定平均聚集系数')
+        plt.xlim(8, 20000)
+        plt.ylim(0, 0.5)
+        plt.xscale('symlog')
+        plt.legend()
+        plt.xlabel('演化时间(节点数)')
+        plt.ylabel('网络平均聚集系数')
+        plt.gcf().tight_layout()
+        plt.savefig('%s/cc.png' % save_path)
+        plt.show()
+    # 直径
+    with open("%s/evo_data.json" % save_path, 'r') as file:
+        cc_dist = json.loads(file.read())['dia']
+        cc_dist = {int(k): float(v) for k, v in cc_dist.items()}
+        cc_dist = np.array(list(cc_dist.items()))
+        plt.plot(cc_dist[:, 0], cc_dist[:, 1], color='r')
+        plt.hlines(6, 0, 10000, colors='gray', linestyles='-.', linewidths=1, label='演化稳定直径')
+        plt.hlines(9, 0, 11, colors='gray', linestyles='--', linewidths=1, label='最大直径')
+        plt.xlim(1, 30000)
+        plt.ylim(0, 10.5)
+        plt.xscale('symlog')
+        plt.xlabel('演化时间(节点数)')
+        plt.ylabel('网络有效直径')
+        plt.legend()
+        plt.gcf().tight_layout()
+        plt.savefig('%s/diameter.png' % save_path)
+        plt.show()
+
+
 def draw_graph(G: nx.Graph, sample_count=1000, save_path: str = '', width: int = 18, height: int = 9,
                target: str = 's',
                is_hold=True):
@@ -529,6 +565,7 @@ def nme_gini_example_ticks():
     plt.text(1, 1, 'F')
     plt.xticks([0, 1], ['O', 1])
     plt.yticks([1], [1])
+    plt.tight_layout()
     plt.savefig('../data/stable/基尼系数样例.png')
     plt.show()
 
@@ -551,9 +588,11 @@ def draw_community_status(
     # 绘制模块度变化趋势和社区数量变化趋势凸显图线
     cm_cof_dist = np.array(cm_cof)
     plt.subplot(total_rows, 3, cur_row * 3 + 1)
-    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 0])
+    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 0], color='b')
+    plt.hlines(cm_cof_dist[:, 0][-1], 0, 10000, colors='gray', linestyles='--', linewidths=1, )
     plt.ylabel('社区数量')
     # 限制坐标轴的最大社区数量
+    plt.xlim(0, 10100)
     plt.ylim(0, max(cm_cof_dist[:, 0]) + 50)
     plt.subplot(total_rows, 3, cur_row * 3 + 2)
     # 绘制社区分布
@@ -570,7 +609,6 @@ def draw_community_status(
     # 遍历列 对每列的y值进行比例计算
     for col in range(y_list.shape[1]):
         y_list[:, col] /= sum(y_list[:, col])
-    print(x, y_list)
     # 设置堆叠图的bottom
     bottom_sum = np.zeros(len(x))
     # 绘制堆叠柱状图
@@ -583,15 +621,21 @@ def draw_community_status(
             hatch=hatch_list[idx]
         )
         bottom_sum += y_list[idx]
-    plt.xlabel('演化时刻\n' + lbl)
-    plt.ylabel('社区数量分布')
+    plt.xlim(0, 10800)
+    plt.xlabel('演化时刻(节点数)\n' + lbl)
+    plt.ylabel('社区分布')
     plt.legend(loc='lower left', fontsize=14)
     plt.subplot(total_rows, 3, cur_row * 3 + 3)
-    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 1])
+    plt.plot(np.arange(len(cm_cof_dist)) * step, cm_cof_dist[:, 1], color='r')
+    plt.hlines(cm_cof_dist[:, 1][-1], 0, 10000, colors='gray', linestyles='--', linewidths=1, )
+    plt.xlim(0, 10100)
     plt.ylim(0, 1)
     plt.ylabel('模块度')
     if not is_hold:
         plt.show()
+    print(lbl, cm_cof_dist[:, 0][-1], cm_cof_dist[:, 1][-1])
+    for v in y_list[:, -1]:
+        print(v)
 
 
 def analyse_community_evolution(
@@ -787,4 +831,8 @@ if __name__ == '__main__':
     # path = '../data/20180128_172813_n6000_e27482_excellnt_不根据_20'
     # path = '../data/20180510_220335_n10000_e28688_dta5_600'
     # path = '../data/20180510_220335_n10000_e28688_dta5_600'
-    NME(types=[5], isHold=False, path=path)
+    # path = '../data/20180130_204852_n20000_e74456_初始不连通d10k10'
+    # NME(types=[5], isHold=False, path=path)
+    # draw_diameter_curve(save_path=path)
+    analyse_gini_coefficient(load_from_csv(path), save_path=path, lbl='度值', hold=True)
+    nme_gini_example_ticks()
