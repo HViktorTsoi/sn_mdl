@@ -1,0 +1,8 @@
+$chatbox_height:530px;
+$chatbox_chatcontent_height:$chatbox_height - 160px;
+$chatbox_chattitle_height:40px;
+$chatbox_sender_height: $chatbox_height - $chatbox_chatcontent_height - $chatbox_chattitle_height+58px;
+$footerheight:60px;
+.mt-10 {
+    margin-top: 10px;
+}
