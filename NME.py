@@ -9,7 +9,7 @@ import os
 import time
 import csv
 import json
-from collections import defaultdict
+from collections import defaultdict, Counter
 import pickle
 
 import Analyser.analyser as analyser
@@ -205,24 +205,51 @@ def save_graph(G, info):
     return save_path
 
 
-def inspect_graph_evolution_data(G, ):
+def network_dist_builder(G: nx.DiGraph):
+    # 度值分布 进行对数计算
+    degree = {
+        'in': [(math.log(k + 1, 10), math.log(v, 10)) for k, v in Counter([item[1] for item in G.in_degree]).items()],
+        'out': [(math.log(k + 1, 10), math.log(v, 10)) for k, v in Counter([item[1] for item in G.out_degree]).items()],
+        'all': [(math.log(k + 1, 10), math.log(v, 10)) for k, v in Counter([item[1] for item in G.degree]).items()]
+    }
+    # 基尼系数
+    gini = {
+        'in': analyser.calc_gini_coeffcient(G, 'in'),
+        'out': analyser.calc_gini_coeffcient(G, 'out'),
+        'all': analyser.calc_gini_coeffcient(G, ),
+    }
+    # 聚集系数分布
+    clustering = nx.clustering(nx.Graph(G.edges))
+    clustering = [(math.log(G.degree(node_id) + 1, 10), math.log(cv + 0.0001, 10))
+                  for node_id, cv in clustering.items()]
+    print(clustering)
+    return {
+        'degree': degree,
+        'gini': gini,
+        'clustering': clustering
+    }
+
+
+def inspect_graph_evolution_data(G):
     # 每隔一段时间将网络信息放入队列
     if G.graph['rq']:
-        if (G.number_of_nodes() % 50 == 0):
+        if G.number_of_nodes() % 20 == 0:
             # 当网络规模较小时放入全部节点 否则取子图
-            threshold = 300
+            scale = 10
+            sub_graph = G.subgraph(nodes=list(G.nodes)[0:int(G.number_of_nodes() / scale)])
+            threshold = 25000
             if G.number_of_nodes() < threshold:
-                nodes = list(G.nodes)
-                edges = list(G.edges)
-            else:
-                sub_graph = G.subgraph(list(G.nodes)[0:threshold])
-                nodes = list(sub_graph.nodes)
-                edges = list(sub_graph.edges)
-            # 将网络拓扑信息加入队列
+                # 将网络拓扑信息加入队列
+                G.graph['rq'].push(json.dumps({
+                    'nodes': list(sub_graph.nodes),
+                    'links': list(sub_graph.edges),
+                    'dist': None,
+                }))
+        if G.number_of_nodes() % 40 == 0:
             G.graph['rq'].push(json.dumps({
-                'nodes': nodes,
-                'links': edges,
-                'dist': None,
+                'nodes': None,
+                'links': None,
+                'dist': network_dist_builder(G),
             }))
 
 

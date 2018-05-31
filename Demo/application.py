@@ -34,9 +34,12 @@ def fetch(uid):
         graph = json.loads(graph_raw_data)
         graph_in_echarts_format = {}
         graph_in_echarts_format['nodes'] = [
-            {'id': node_id, 'name': node_id} for node_id in graph['nodes']]
+            {'id': node_id, 'name': node_id, 'itemStyle': {}}
+            for node_id in graph['nodes']] if graph['nodes'] else None
         graph_in_echarts_format['links'] = [
-            {'source': edge[0], 'target': edge[1]} for edge in graph['links']]
+            {'source': edge[0], 'target': edge[1]} for edge in graph['links']] if graph['links'] else None
+        graph_in_echarts_format['dist'] = graph['dist']
+        print(graph_in_echarts_format['dist'])
         return json.dumps(graph_in_echarts_format)
     else:
         return ''

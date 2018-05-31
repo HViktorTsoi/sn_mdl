@@ -324,6 +324,36 @@ def analyse_clustering_coefficient(
             plt.savefig('%s/聚集系数分布.png' % (save_path))
 
 
+def calc_gini_coeffcient(G, calc_type=None):
+    """
+    计算洛伦兹曲线数据
+    :param G:
+    :param calc_type:
+    :return:
+    """
+    N = G.number_of_nodes()
+    # 根据类型的不同选择出度、入度或者度
+    print('当前正在计算%s' % (calc_type if calc_type else 'all'))
+    raw_degree = G.degree if calc_type is None \
+        else G.in_degree if calc_type == 'in' \
+        else G.out_degree if calc_type == 'out' else None
+    linestyle_dict = {None: '-', 'in': '-.', 'out': ':'}
+    # 总度数
+    print('计算总度数')
+    sum_k = sum([raw_degree[node_id] for node_id in G.nodes])
+    # 经过排序的节点度列表
+    node_list = sorted(raw_degree, key=lambda n: n[1])
+    # 计算洛伦兹曲线数据
+    print('计算曲线数据')
+    s = 0
+    lorentz_curve_data = []
+    for idx, node in enumerate(node_list):
+        x = idx / N
+        s += node[1] / sum_k
+        lorentz_curve_data.append((x, s,))
+    return lorentz_curve_data
+
+
 @utils.destroy
 def analyse_gini_coefficient(G: nx.Graph, calc_type=None, hold=True, lbl='', save_path=''):
     N = G.number_of_nodes()
