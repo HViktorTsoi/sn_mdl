@@ -10,20 +10,18 @@ pool = redis.ConnectionPool(host='127.0.0.1', port=6379, decode_responses=True)
 rds = redis.Redis(connection_pool=pool)
 
 
-@app.route('/start')
+@app.route('/start', methods=['POST'])
 def start():
     # 为此次演化生成唯一id
     uid = uuid.uuid1()
     print('本次演化ID', uid)
+    # 获取网络演化参数
+    evo_params = json.loads(request.data.decode())
+    # 设置演化唯一ID
+    evo_params['uuid'] = str(uid)
+    print(evo_params)
     # 发布演化开始消息
-    rds.publish('NME_SIGNAL_START', json.dumps({
-        'init_graph_size': 10,
-        'delta_origin': 10,
-        'max_ntwk_size': 10000,
-        'k': 7,
-        'analyse_community': False,
-        'uuid': str(uid)
-    }))
+    rds.publish('NME_SIGNAL_START', json.dumps(evo_params))
     return str(uid)
 
 
@@ -31,9 +29,17 @@ def start():
 def fetch(uid):
     print(f'获取{uid}的网络拓扑信息')
     rq = RedisQueue(db_name=f'NME_{uid}')
-    return json.dumps(
-        rq.pop()
-    )
+    graph_raw_data = rq.pop()
+    if graph_raw_data is not None:
+        graph = json.loads(graph_raw_data)
+        graph_in_echarts_format = {}
+        graph_in_echarts_format['nodes'] = [
+            {'id': node_id, 'name': node_id} for node_id in graph['nodes']]
+        graph_in_echarts_format['links'] = [
+            {'source': edge[0], 'target': edge[1]} for edge in graph['links']]
+        return json.dumps(graph_in_echarts_format)
+    else:
+        return ''
 
 
 if __name__ == '__main__':

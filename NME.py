@@ -205,6 +205,27 @@ def save_graph(G, info):
     return save_path
 
 
+def inspect_graph_evolution_data(G, ):
+    # 每隔一段时间将网络信息放入队列
+    if G.graph['rq']:
+        if (G.number_of_nodes() % 50 == 0):
+            # 当网络规模较小时放入全部节点 否则取子图
+            threshold = 300
+            if G.number_of_nodes() < threshold:
+                nodes = list(G.nodes)
+                edges = list(G.edges)
+            else:
+                sub_graph = G.subgraph(list(G.nodes)[0:threshold])
+                nodes = list(sub_graph.nodes)
+                edges = list(sub_graph.edges)
+            # 将网络拓扑信息加入队列
+            G.graph['rq'].push(json.dumps({
+                'nodes': nodes,
+                'links': edges,
+                'dist': None,
+            }))
+
+
 def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_community=False, uuid=None):
     G = init_network(init_graph_size=init_graph_size, init_weight=1, k=k)
     # 如果存在uuid 则初始化redis队列
@@ -214,15 +235,7 @@ def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_com
         # 添加一个节点，并且按照入势选择网络中的一个节点进行连接
         new_node_id = add_new_node(G, k)
         # 每隔一段时间将网络信息放入队列
-        if G.graph['rq'] and new_node_id % 500 == 0:
-            # 将网络拓扑信息加入队列
-            G.graph['rq'].push(json.dumps({
-                # 'nodes': [{'id': node_id, 'name': node_id} for node_id in G.nodes],
-                # 'links': [{'source': edge[0], 'target': edge[1]} for edge in G.edges],
-                'nodes': list(G.nodes),
-                'links': list(G.edges),
-                'dist': None,
-            }))
+        inspect_graph_evolution_data(G)
         # 如果开启社区分析 则分析社区
         if analyse_community and new_node_id % 1000 == 0:
             analyser.analyse_communities(G, calc_mod=True)
