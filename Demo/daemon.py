@@ -3,6 +3,7 @@ import json
 import pprint
 import NME
 import sys
+import traceback
 
 
 # 监听
@@ -24,6 +25,7 @@ def listening_task(handler_id):
                         uuid=params['uuid']
                     )
                 except Exception as e:
+                    traceback.print_exc(file=sys.stderr)
                     print('演化过程中出现错误：\n', e, file=sys.stderr)
 
 

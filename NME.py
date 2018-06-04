@@ -223,10 +223,25 @@ def network_dist_builder(G: nx.DiGraph):
     clustering = [(math.log(G.degree(node_id) + 1, 10), math.log(cv + 0.0001, 10))
                   for node_id, cv in clustering.items()]
     print(clustering)
+    # 信息传播
+    power = {
+        'in': [(math.log(k + 1, 10), math.log(v, 10))
+               for k, v in Counter([(item[1][Is]) for item in G.nodes(data=True)]).items() if math.log(v, 10) > 0],
+        'out': [(math.log(k + 1, 10), math.log(v, 10))
+                for k, v in Counter([(item[1][Os]) for item in G.nodes(data=True)]).items() if math.log(v, 10) > 0],
+    }
+
+    # 边活跃度
+    # 变换方式
+    def convert(v, cutoff=2.6):
+        v = math.log10((v - 1)) + cutoff
+        return v if v > 0 else 0
+
     return {
         'degree': degree,
         'gini': gini,
-        'clustering': clustering
+        'clustering': clustering,
+        'power': power,
     }
 
 
