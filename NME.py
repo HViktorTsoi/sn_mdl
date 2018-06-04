@@ -222,7 +222,6 @@ def network_dist_builder(G: nx.DiGraph):
     clustering = nx.clustering(nx.Graph(G.edges))
     clustering = [(math.log(G.degree(node_id) + 1, 10), math.log(cv + 0.0001, 10))
                   for node_id, cv in clustering.items()]
-    print(clustering)
     # 信息传播
     power = {
         'in': [(math.log(k + 1, 10), math.log(v, 10))
@@ -254,13 +253,14 @@ def inspect_graph_evolution_data(G):
             sub_graph = G.subgraph(nodes=list(G.nodes)[0:int(G.number_of_nodes() / scale)])
             threshold = 25000
             if G.number_of_nodes() < threshold:
-                # 将网络拓扑信息加入队列
+                # 将网络拓扑信息的变化加入队列
                 G.graph['rq'].push(json.dumps({
-                    'nodes': list(sub_graph.nodes),
-                    'links': list(sub_graph.edges),
+                    'nodes': list(set(sub_graph.nodes)-set(G.graph['prev_subgraph']['nodes'])),
+                    'links': list(set(sub_graph.edges)-set(G.graph['prev_subgraph']['edges'])),
                     'dist': None,
                 }))
-        if G.number_of_nodes() % 40 == 0:
+            G.graph['prev_subgraph']={'nodes':list(sub_graph.nodes),'edges':list(sub_graph.edges)}
+        if G.number_of_nodes() % 20 == 0:
             G.graph['rq'].push(json.dumps({
                 'nodes': None,
                 'links': None,
@@ -273,6 +273,7 @@ def start_evolution(init_graph_size, delta_origin, max_ntwk_size, k, analyse_com
     # 如果存在uuid 则初始化redis队列
     if uuid:
         G.graph['rq'] = RedisQueue(db_name=f'NME_{uuid}')
+        G.graph['prev_subgraph']={'nodes':[],'edges':[]}
     while G.number_of_nodes() < max_ntwk_size:
         # 添加一个节点，并且按照入势选择网络中的一个节点进行连接
         new_node_id = add_new_node(G, k)
